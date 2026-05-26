@@ -1,7 +1,7 @@
 # Домашнее задание к занятию «Резервное копирование баз данных»> - `Рунов ВВ`
 
-### Задание 1. Резервное копирование
-### Кейс
+## Задание 1. Резервное копирование
+#### Кейс
 Финансовая компания решила увеличить надёжность работы баз данных и их резервного копирования. 
 Необходимо описать, какие варианты резервного копирования подходят в случаях: 
 
@@ -28,66 +28,64 @@
 
 ---
 
-### Задание 2. PostgreSQL
+## Задание 2. PostgreSQL
 
 2.1. С помощью официальной документации приведите пример команды резервирования данных и восстановления БД (pgdump/pgrestore).
 2.1.* Возможно ли автоматизировать этот процесс? Если да, то как?
 *Приведите ответ в свободной форме.*
 
 
-### Ответ
-pg_dump -U username -h hostname -p port dbname > backup_file.sql
-pg_restore -U username -h hostname -p port -d dbname backup_file
+#### Ответ
+pg_dump -U username -h hostname -p port dbname > backup_file.sql  
+pg_restore -U username -h hostname -p port -d dbname backup_file  
 
-### Автоматизация через скрипты 
+##### Автоматизация через скрипты 
+#!/bin/bash  
+##### Параметры подключения
+USER="username"  
+HOST="hostname"  
+PORT="5432"  
+DBNAME="dbname"  
+BACKUP_DIR="/path/to/backup/directory"  
+DATE=$(date +"%Y%m%d%H%M")  
+
+#### Создание резервной копии 
+pg_dump -U $USER -h $HOST -p $PORT $DBNAME > "$BACKUP_DIR/backup_$DATE.sql"  
+
+#### Удаление резервных копий старше 7 дней
+find $BACKUP_DIR -type f -name "*.sql" -mtime +7 -exec rm {} \;  
+
+####восстановления
 #!/bin/bash
-# Параметры подключения
-USER="username"
-HOST="hostname"
-PORT="5432"
-DBNAME="dbname"
-BACKUP_DIR="/path/to/backup/directory"
-DATE=$(date +"%Y%m%d%H%M")
 
-# Создание резервной копии
-pg_dump -U $USER -h $HOST -p $PORT $DBNAME > "$BACKUP_DIR/backup_$DATE.sql"
+#### Параметры подключения
+USER="username"  
+HOST="hostname"  
+PORT="5432"  
+DBNAME="dbname"  
+BACKUP_FILE="/path/to/backup/directory/backup_file.sql"  
 
-# Удаление резервных копий старше 7 дней
-find $BACKUP_DIR -type f -name "*.sql" -mtime +7 -exec rm {} \;
+#### Восстановление базы данных
+psql -U $USER -h $HOST -p $PORT -d $DBNAME < $BACKUP_FILE  
 
-#восстановления
-#!/bin/bash
-
-# Параметры подключения
-USER="username"
-HOST="hostname"
-PORT="5432"
-DBNAME="dbname"
-BACKUP_FILE="/path/to/backup/directory/backup_file.sql"
-
-# Восстановление базы данных
-psql -U $USER -h $HOST -p $PORT -d $DBNAME < $BACKUP_FILE
-
-
-
-### Задание 3. MySQL
+## Задание 3. MySQL
 3.1. С помощью официальной документации приведите пример команды инкрементного резервного копирования базы данных MySQL.
 3.1.* В каких случаях использование реплики будет давать преимущество по сравнению с обычным резервным копированием?
 Приведите ответ в свободной форме.
 
 ### Ответ
 
-MySQL резервное копирование с помощью утилиты mysqldump 
-[mysqld]
-log-bin=mysql-bin
+MySQL резервное копирование с помощью утилиты mysqldump  
+[mysqld]  
+log-bin=mysql-bin  
 
-Полное резервное копирование
-mysqldump -u username -p --all-databases > full_backup.sql
+Полное резервное копирование  
+mysqldump -u username -p --all-databases > full_backup.sql  
 
-Инкрементное резервное копирование
-mysqlbinlog --start-position=POSITION --stop-position=POSITION mysql-bin.000001 > incremental_backup.sql
-
-Восстановить базу данных из полного и инкрементного резервного копирования:
+##### Инкрементное резервное копирование  
+mysqlbinlog --start-position=POSITION --stop-position=POSITION mysql-bin.000001 > incremental_backup.sql  
+  
+##### Восстановить базу данных из полного и инкрементного резервного копирования:  
 mysql -u username -p < full_backup.sql
 mysql -u username -p < incremental_backup.sql
 
